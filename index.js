@@ -57,12 +57,12 @@ EventEmitter.prototype.listeners = function listeners(event) {
  * @api public
  */
 EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-  if (!this._events || !this._events[event]) return false;
+  if (!this._events || !this._events[event]) return true;
 
   var listeners = this._events[event]
-    , len = arguments.length
-    , args
-    , i;
+      , len = arguments.length
+      , args
+      , i;
 
   if ('function' === typeof listeners.fn) {
     if (listeners.once) this.removeListener(event, listeners.fn, true);
@@ -80,25 +80,34 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
       args[i - 1] = arguments[i];
     }
 
-    listeners.fn.apply(listeners.context, args);
+    return listeners.fn.apply(listeners.context, args);
   } else {
     var length = listeners.length
-      , j;
+        , j;
+
+    // Copy listeners array so no-one (NO ONE, including me)
+    // can mess with the indexes.
+    listeners = [].concat(listeners)
 
     for (i = 0; i < length; i++) {
       if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
 
+      var ret
+
       switch (len) {
-        case 1: listeners[i].fn.call(listeners[i].context); break;
-        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
-        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+        case 1: ret = listeners[i].fn.call(listeners[i].context); break;
+        case 2: ret = listeners[i].fn.call(listeners[i].context, a1); break;
+        case 3: ret = listeners[i].fn.call(listeners[i].context, a1, a2); break;
         default:
           if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
             args[j - 1] = arguments[j];
           }
 
-          listeners[i].fn.apply(listeners[i].context, args);
+          ret = listeners[i].fn.apply(listeners[i].context, args);
       }
+
+      if (ret === false)
+        return false
     }
   }
 
@@ -163,7 +172,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, once)
   if (!this._events || !this._events[event]) return this;
 
   var listeners = this._events[event]
-    , events = [];
+      , events = [];
 
   if (fn) {
     if (listeners.fn && (listeners.fn !== fn || (once && !listeners.once))) {
@@ -226,4 +235,4 @@ EventEmitter.EventEmitter3 = EventEmitter;
 //
 // Expose the module.
 //
-module.exports = EventEmitter;
+module.exports = {EventEmitter: EventEmitter};
