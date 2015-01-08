@@ -1,5 +1,5 @@
 {
-  "name": "eventemitter3",
+  "name": "eventemitter3-abortable",
   "version": "0.1.6",
   "description": "EventEmitter3 focuses on performance while maintaining a Node.js AND browser compatible interface.",
   "main": "index.js",
