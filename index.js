@@ -68,12 +68,12 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
     if (listeners.once) this.removeListener(event, listeners.fn, true);
 
     switch (len) {
-      case 1: return listeners.fn.call(listeners.context), true;
-      case 2: return listeners.fn.call(listeners.context, a1), true;
-      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
-      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
-      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
-      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+      case 1: return listeners.fn.call(listeners.context);
+      case 2: return listeners.fn.call(listeners.context, a1);
+      case 3: return listeners.fn.call(listeners.context, a1, a2);
+      case 4: return listeners.fn.call(listeners.context, a1, a2, a3);
+      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4);
+      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5);
     }
 
     for (i = 1, args = new Array(len -1); i < len; i++) {
