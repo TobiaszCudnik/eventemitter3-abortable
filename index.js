@@ -64,23 +64,14 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
       , args
       , i;
 
+  for (i = 1, args = new Array(len -1); i < len; i++) {
+    args[i - 1] = arguments[i];
+  }
+
   if ('function' === typeof listeners.fn) {
     if (listeners.once) this.removeListener(event, listeners.fn, true);
 
-    switch (len) {
-      case 1: return listeners.fn.call(listeners.context);
-      case 2: return listeners.fn.call(listeners.context, a1);
-      case 3: return listeners.fn.call(listeners.context, a1, a2);
-      case 4: return listeners.fn.call(listeners.context, a1, a2, a3);
-      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4);
-      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5);
-    }
-
-    for (i = 1, args = new Array(len -1); i < len; i++) {
-      args[i - 1] = arguments[i];
-    }
-
-    return listeners.fn.apply(listeners.context, args);
+    return this.callListener(listeners.fn, listeners.context, args)
   } else {
     var length = listeners.length
         , j;
@@ -92,19 +83,7 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
     for (i = 0; i < length; i++) {
       if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
 
-      var ret
-
-      switch (len) {
-        case 1: ret = listeners[i].fn.call(listeners[i].context); break;
-        case 2: ret = listeners[i].fn.call(listeners[i].context, a1); break;
-        case 3: ret = listeners[i].fn.call(listeners[i].context, a1, a2); break;
-        default:
-          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
-            args[j - 1] = arguments[j];
-          }
-
-          ret = listeners[i].fn.apply(listeners[i].context, args);
-      }
+      var ret = this.callListener(listeners[i].fn, listeners[i].context, args)
 
       if (ret === false)
         return false
@@ -113,6 +92,17 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 
   return true;
 };
+
+/**
+ * Callback executor for overridding.
+ * @param listener
+ * @param context
+ * @param params
+ * @return {*}
+ */
+EventEmitter.prototype.callListener = function(listener, context, params) {
+  return listener.apply(context, params)
+}
 
 /**
  * Register a new EventListener for the given event.
